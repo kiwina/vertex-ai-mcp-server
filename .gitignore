@@ -6,3 +6,5 @@ build/
 *.zip
 *.md
 !README.md
+js-genai/
+.roo/

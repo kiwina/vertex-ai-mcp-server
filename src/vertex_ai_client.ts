@@ -104,11 +104,14 @@ export async function callGenerativeAI(
           safetySettings: safetySettings,
         },
       };
-
       // Remove undefined systemInstruction if present (API might error)
       if (requestParams.systemInstruction === undefined) {
         delete requestParams.systemInstruction;
       }
+      console.log(
+        "DEBUG: Request Params Sent to generateContentStream:",
+        JSON.stringify(requestParams, null, 2)
+      );
 
       if (useStreaming) {
         let accumulatedText = "";
