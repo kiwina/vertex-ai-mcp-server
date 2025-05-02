@@ -26,7 +26,7 @@ import { getAIConfig } from "./config.js";
 import { callGenerativeAI } from "./vertex_ai_client.js";
 import { allTools, toolMap } from "./tools/index.js";
 import {
-  buildInitialContent,
+  buildApiPayload, // Renamed from buildInitialContent
   getToolsForApi,
 } from "./tools/tool_definition.js";
 
@@ -326,18 +326,12 @@ server.setRequestHandler(CallToolRequestSchema, async (request) => {
         enableFunctionCalling,
       } = toolDefinition.buildPrompt(args, config.modelId);
 
-      // Use new AI function call and type cast
-      const initialContents = buildInitialContent(
-        systemInstructionText,
-        userQueryText
-      );
+      // Use new AI function call and payload builder
+      const payload = buildApiPayload(systemInstructionText, userQueryText);
       const toolsForApi = getToolsForApi(enableFunctionCalling, useWebSearch);
 
-      const generatedContent = await callGenerativeAI(
-        initialContents,
-        toolsForApi
-        // Config args removed
-      );
+      const generatedContent = await callGenerativeAI(payload, toolsForApi);
+      // Removed dangling );
 
       const validOutputPath = validateWorkspacePath(output_path);
       await fs.mkdir(path.dirname(validOutputPath), { recursive: true });
@@ -363,16 +357,10 @@ server.setRequestHandler(CallToolRequestSchema, async (request) => {
         enableFunctionCalling,
       } = toolDefinition.buildPrompt(args, config.modelId);
 
-      const initialContents = buildInitialContent(
-        systemInstructionText,
-        userQueryText
-      );
+      const payload = buildApiPayload(systemInstructionText, userQueryText); // Use buildApiPayload
       const toolsForApi = getToolsForApi(enableFunctionCalling, useWebSearch);
 
-      const generatedContent = await callGenerativeAI(
-        initialContents,
-        toolsForApi
-      );
+      const generatedContent = await callGenerativeAI(payload, toolsForApi); // Pass payload
 
       const validOutputPath = validateWorkspacePath(output_path);
       await fs.mkdir(path.dirname(validOutputPath), { recursive: true });
@@ -398,16 +386,10 @@ server.setRequestHandler(CallToolRequestSchema, async (request) => {
         enableFunctionCalling,
       } = toolDefinition.buildPrompt(args, config.modelId);
 
-      const initialContents = buildInitialContent(
-        systemInstructionText,
-        userQueryText
-      );
+      const payload = buildApiPayload(systemInstructionText, userQueryText); // Use buildApiPayload
       const toolsForApi = getToolsForApi(enableFunctionCalling, useWebSearch);
 
-      const generatedContent = await callGenerativeAI(
-        initialContents,
-        toolsForApi
-      );
+      const generatedContent = await callGenerativeAI(payload, toolsForApi); // Pass payload
 
       const validOutputPath = validateWorkspacePath(output_path);
       await fs.mkdir(path.dirname(validOutputPath), { recursive: true });
@@ -433,16 +415,10 @@ server.setRequestHandler(CallToolRequestSchema, async (request) => {
         enableFunctionCalling,
       } = toolDefinition.buildPrompt(args, config.modelId);
 
-      const initialContents = buildInitialContent(
-        systemInstructionText,
-        userQueryText
-      );
+      const payload = buildApiPayload(systemInstructionText, userQueryText); // Use buildApiPayload
       const toolsForApi = getToolsForApi(enableFunctionCalling, useWebSearch);
 
-      const generatedContent = await callGenerativeAI(
-        initialContents,
-        toolsForApi
-      );
+      const generatedContent = await callGenerativeAI(payload, toolsForApi); // Pass payload
 
       const validOutputPath = validateWorkspacePath(output_path);
       await fs.mkdir(path.dirname(validOutputPath), { recursive: true });
@@ -468,16 +444,10 @@ server.setRequestHandler(CallToolRequestSchema, async (request) => {
         enableFunctionCalling,
       } = toolDefinition.buildPrompt(args, config.modelId);
 
-      const initialContents = buildInitialContent(
-        systemInstructionText,
-        userQueryText
-      );
+      const payload = buildApiPayload(systemInstructionText, userQueryText); // Use buildApiPayload
       const toolsForApi = getToolsForApi(enableFunctionCalling, useWebSearch);
 
-      const generatedContent = await callGenerativeAI(
-        initialContents,
-        toolsForApi
-      );
+      const generatedContent = await callGenerativeAI(payload, toolsForApi); // Pass payload
 
       const validOutputPath = validateWorkspacePath(output_path);
       await fs.mkdir(path.dirname(validOutputPath), { recursive: true });
@@ -645,18 +615,12 @@ server.setRequestHandler(CallToolRequestSchema, async (request) => {
         useWebSearch,
         enableFunctionCalling,
       } = toolDefinition.buildPrompt(args, config.modelId);
-      const initialContents = buildInitialContent(
-        systemInstructionText,
-        userQueryText
-      );
+      const payload = buildApiPayload(systemInstructionText, userQueryText);
       const toolsForApi = getToolsForApi(enableFunctionCalling, useWebSearch);
 
       // Call the unified AI function
-      const responseText = await callGenerativeAI(
-        initialContents,
-        toolsForApi
-        // Config is implicitly used by callGenerativeAI now
-      );
+      const responseText = await callGenerativeAI(payload, toolsForApi);
+      // Removed dangling );
 
       return {
         content: [{ type: "text", text: responseText }],

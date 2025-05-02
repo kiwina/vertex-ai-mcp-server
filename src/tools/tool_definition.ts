@@ -1,5 +1,6 @@
 import { McpError, ErrorCode } from "@modelcontextprotocol/sdk/types.js";
-import { Content, Tool } from "@google/genai";
+// Import Content and Part types correctly
+import { Content, Tool, Part } from "@google/genai";
 
 export interface ToolDefinition {
   name: string;
@@ -18,14 +19,28 @@ export interface ToolDefinition {
 
 export const modelIdPlaceholder = "${modelId}"; // Placeholder for dynamic model ID in descriptions
 
-// Helper to build the initial content array
-export function buildInitialContent(
-  systemInstruction: string,
-  userQuery: string
-): Content[] {
-  return [
-    { role: "user", parts: [{ text: `${systemInstruction}\n\n${userQuery}` }] },
-  ];
+// Define the structure for the payload passed to callGenerativeAI
+export interface GenerativeAIRequestPayload {
+  contents: Content[];
+  systemInstruction?: Content; // Make optional for cases without system instructions
+}
+
+// Helper to build the payload object for callGenerativeAI
+export function buildApiPayload(
+  systemInstructionText: string | undefined, // Allow undefined system instruction
+  userQueryText: string
+): GenerativeAIRequestPayload {
+  const payload: GenerativeAIRequestPayload = {
+    contents: [{ role: "user", parts: [{ text: userQueryText }] }],
+  };
+  // Only add systemInstruction if text is provided
+  if (systemInstructionText) {
+    payload.systemInstruction = {
+      // role: "system", // Role is implicit for systemInstruction field
+      parts: [{ text: systemInstructionText }],
+    };
+  }
+  return payload;
 }
 
 // Helper to determine tools for API call

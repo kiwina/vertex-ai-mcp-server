@@ -13,6 +13,7 @@ import { McpError, ErrorCode } from "@modelcontextprotocol/sdk/types.js";
 import { getAIConfig } from "./config.js";
 import { sleep } from "./utils.js";
 import { GoogleGenAI } from "@google/genai";
+import { GenerativeAIRequestPayload } from "./tools/tool_definition.js"; // Import the new payload type
 
 // --- Configuration and Client Initialization ---
 const aiConfig = getAIConfig();
@@ -51,7 +52,8 @@ try {
 
 // --- Unified AI Call Function ---
 export async function callGenerativeAI(
-  initialContents: Content[],
+  // Update the first parameter type
+  payload: GenerativeAIRequestPayload,
   tools: Tool[] | undefined
 ): Promise<string> {
   const {
@@ -65,9 +67,7 @@ export async function callGenerativeAI(
     safetySettings,
   } = aiConfig;
 
-  const isGroundingRequested = tools?.some(
-    (tool) => tool.googleSearchRetrieval
-  );
+  const isGroundingRequested = tools?.some((tool) => tool.googleSearch);
   const hasFunctionCalling = tools?.some((tool) => tool.functionDeclarations);
 
   // Prepare GenerationConfig part
@@ -92,9 +92,11 @@ export async function callGenerativeAI(
       const modelMethods = generativeClient.models;
 
       // Construct the request parameters object
+      // Construct the request parameters object using the payload
       const requestParams = {
         model: modelId,
-        contents: initialContents,
+        contents: payload.contents, // Use contents from payload
+        systemInstruction: payload.systemInstruction, // Use systemInstruction from payload
         tools,
         config: {
           // Apply config within this object
@@ -102,6 +104,11 @@ export async function callGenerativeAI(
           safetySettings: safetySettings,
         },
       };
+
+      // Remove undefined systemInstruction if present (API might error)
+      if (requestParams.systemInstruction === undefined) {
+        delete requestParams.systemInstruction;
+      }
 
       if (useStreaming) {
         let accumulatedText = "";
