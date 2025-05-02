@@ -22,7 +22,8 @@
     "build": "bun run tsc && node -e \"require('fs').chmodSync('build/index.js', '755')\"",
     "prepare": "bun run build",
     "watch": "bun run tsc --watch",
-    "inspector": "bunx @modelcontextprotocol/inspector build/index.js"
+    "inspector": "bunx @modelcontextprotocol/inspector build/index.js",
+    "debug": "bunx build/debug_wrapper.js"
   },
   "dependencies": {
     "@google-cloud/vertexai": "^1.9.3",
