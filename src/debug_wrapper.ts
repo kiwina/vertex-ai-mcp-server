@@ -58,7 +58,7 @@ const sampleQueryArgs = {
     const tools: Tool[] = [];
     if (useWebSearch) {
       console.log("Adding Google Search tool...");
-      tools.push({ googleSearch: {} });
+      tools.push({ googleSearchRetrieval: {} });
     }
 
     if (enableFunctionCalling) {
