@@ -5,7 +5,7 @@
   "license": "MIT",
   "type": "module",
   "bin": {
-    "vertex-ai-mcp-server": "build/index.js"
+    "vertex-ai-mcp-server": "build/src/index.js"
   },
   "repository": {
     "type": "git",
