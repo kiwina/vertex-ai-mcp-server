@@ -19,11 +19,11 @@
     "build"
   ],
   "scripts": {
-    "build": "bun run tsc && node -e \"require('fs').chmodSync('build/index.js', '755')\"",
+    "build": "bun run tsc && node -e \"require('fs').chmodSync('build/src/index.js', '755')\"",
     "prepare": "bun run build",
     "watch": "bun run tsc --watch",
-    "inspector": "bunx @modelcontextprotocol/inspector build/index.js",
-    "debug": "bun run build && bunx build/debug_wrapper.js"
+    "inspector": "bunx @modelcontextprotocol/inspector build/src/index.js",
+    "debug": "bun run build && bunx build/tests/debug_wrapper.js"
   },
   "dependencies": {
     "@google/genai": "^0.12.0",
