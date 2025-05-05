@@ -8,6 +8,5 @@ build/
 !README.md
 js-genai/
 .roo/
-src/debug_wrapper.ts
-src/test_auth_options.ts
+tests/
 credentials/

@@ -20,10 +20,10 @@ import {
 
 // Import all schemas
 import { ReadFileArgsSchema } from "../tools/read_file.js";
-import { ReadMultipleFilesArgsSchema } from "../tools/read_multiple_files.js";
+// import { ReadMultipleFilesArgsSchema } from "../tools/read_multiple_files.js"; // Removed
 import { WriteFileArgsSchema } from "../tools/write_file.js";
 import { EditFileArgsSchema } from "../tools/edit_file.js";
-import { CreateDirectoryArgsSchema } from "../tools/create_directory.js";
+// import { CreateDirectoryArgsSchema } from "../tools/create_directory.js"; // Removed
 import { ListDirectoryArgsSchema } from "../tools/list_directory.js";
 import { DirectoryTreeArgsSchema } from "../tools/directory_tree.js";
 import { MoveFileArgsSchema } from "../tools/move_file.js";
@@ -113,39 +113,58 @@ export async function handleSaveGenerateTool(
  */
 export async function handleFilesystemTool(toolName: string, args: any) {
   let resultText = "";
-
   switch (toolName) {
     case "read_file_content": {
       const parsed = ReadFileArgsSchema.parse(args);
-      const validPath = validateWorkspacePath(parsed.path);
-      const content = await fs.readFile(validPath, "utf-8");
-      resultText = content;
+      if (typeof parsed.paths === "string") {
+        // Handle single file read
+        const validPath = validateWorkspacePath(parsed.paths);
+        const content = await fs.readFile(validPath, "utf-8");
+        resultText = content;
+      } else {
+        // Handle multiple file read (similar to old read_multiple_files_content)
+        const results = await Promise.all(
+          parsed.paths.map(async (filePath: string) => {
+            try {
+              const validPath = validateWorkspacePath(filePath);
+              const content = await fs.readFile(validPath, "utf-8");
+              return `${path.relative(
+                process.cwd(),
+                validPath
+              )}:\n${content}\n`;
+            } catch (error) {
+              const errorMessage =
+                error instanceof Error ? error.message : String(error);
+              return `${filePath}: Error - ${errorMessage}`;
+            }
+          })
+        );
+        resultText = results.join("\n---\n");
+      }
       break;
     }
-    case "read_multiple_files_content": {
-      const parsed = ReadMultipleFilesArgsSchema.parse(args);
-      const results = await Promise.all(
-        parsed.paths.map(async (filePath: string) => {
-          try {
-            const validPath = validateWorkspacePath(filePath);
-            const content = await fs.readFile(validPath, "utf-8");
-            return `${path.relative(process.cwd(), validPath)}:\n${content}\n`;
-          } catch (error) {
-            return `${filePath}: Error - ${
-              error instanceof Error ? error.message : String(error)
-            }`;
-          }
-        })
-      );
-      resultText = results.join("\n---\n");
-      break;
-    }
+    // case "read_multiple_files_content": removed - functionality merged into read_file_content
     case "write_file_content": {
       const parsed = WriteFileArgsSchema.parse(args);
-      const validPath = validateWorkspacePath(parsed.path);
-      await fs.mkdir(path.dirname(validPath), { recursive: true });
-      await fs.writeFile(validPath, parsed.content, "utf-8");
-      resultText = `Successfully wrote to ${parsed.path}`;
+      // Access the 'writes' property which contains either a single object or an array
+      const writeOperations = Array.isArray(parsed.writes)
+        ? parsed.writes
+        : [parsed.writes];
+      const results: string[] = [];
+
+      for (const op of writeOperations) {
+        try {
+          const validPath = validateWorkspacePath(op.path);
+          await fs.mkdir(path.dirname(validPath), { recursive: true });
+          await fs.writeFile(validPath, op.content, "utf-8");
+          results.push(`Successfully wrote to ${op.path}`);
+        } catch (error) {
+          const errorMessage =
+            error instanceof Error ? error.message : String(error);
+          results.push(`Error writing to ${op.path}: ${errorMessage}`);
+        }
+      }
+      resultText = results.join("\n");
       break;
     }
     case "edit_file_content": {
@@ -159,14 +178,7 @@ export async function handleFilesystemTool(toolName: string, args: any) {
       const validPath = validateWorkspacePath(parsed.path);
       resultText = await applyFileEdits(validPath, parsed.edits, parsed.dryRun);
       break;
-    }
-    case "create_directory": {
-      const parsed = CreateDirectoryArgsSchema.parse(args);
-      const validPath = validateWorkspacePath(parsed.path);
-      await fs.mkdir(validPath, { recursive: true });
-      resultText = `Successfully created directory ${parsed.path}`;
-      break;
-    }
+    } // case "create_directory": removed
     case "list_directory_contents": {
       const parsed = ListDirectoryArgsSchema.parse(args);
       const validPath = validateWorkspacePath(parsed.path);

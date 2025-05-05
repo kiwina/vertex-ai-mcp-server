@@ -1,6 +1,6 @@
 {
   "name": "vertex-ai-mcp-server",
-  "version": "0.2.2",
+  "version": "0.3.5",
   "description": "A Model Context Protocol server supporting Vertex AI and Gemini API",
   "license": "MIT",
   "type": "module",
@@ -26,9 +26,7 @@
     "debug": "bun run build && bunx build/debug_wrapper.js"
   },
   "dependencies": {
-    "@google-cloud/vertexai": "^1.9.3",
     "@google/genai": "^0.12.0",
-    "@google/generative-ai": "^0.17.0",
     "@modelcontextprotocol/sdk": "0.6.0",
     "diff": "^7.0.0",
     "dotenv": "^16.5.0",

@@ -21,7 +21,7 @@ import { z } from "zod";
 import { getAIConfig } from "./config.js";
 import { allTools, toolMap } from "./tools/index.js";
 
-// Import utility functions from the new utils directory
+// Import utility functions from the utils directory
 import {
   filesystemToolNames,
   saveGenerateToolNames,
@@ -73,34 +73,28 @@ server.setRequestHandler(CallToolRequestSchema, async (request) => {
       return await handleGenericAITool(toolName, args, toolDefinition);
     }
   } catch (error) {
-    // Centralized error handling
+    // Convert errors to proper MCP error format
     if (error instanceof z.ZodError) {
       throw new McpError(
         ErrorCode.InvalidParams,
-        `Invalid arguments for ${toolName}: ${error.errors
-          .map((e) => `${e.path.join(".")}: ${e.message}`)
-          .join(", ")}`
-      );
-    } else if (error instanceof McpError) {
-      throw error;
-    } else if (error instanceof Error && error.message.includes("ENOENT")) {
-      throw new McpError(
-        ErrorCode.InvalidParams,
-        `Path not found for tool ${toolName}: ${error.message}`
-      );
-    } else {
-      logMessage(`Unexpected error in tool handler (${toolName}):`, error);
-      throw new McpError(
-        ErrorCode.InternalError,
-        `Unexpected server error during ${toolName}: ${
-          (error as Error).message || "Unknown"
-        }`
+        `Invalid arguments for tool ${toolName}: ${error.message}`
       );
     }
+    
+    if (error instanceof McpError) {
+      throw error;
+    }
+
+    // Default error handling
+    const errorMessage = error instanceof Error ? error.message : String(error);
+    logMessage(`Error handling tool ${toolName}:`, errorMessage);
+    throw new McpError(
+      ErrorCode.InternalError,
+      `Error executing tool ${toolName}: ${errorMessage}`
+    );
   }
 });
 
-// --- Server Start ---
 async function main() {
   const transport = new StdioServerTransport();
   logMessage("vertex-ai-mcp-server connecting via stdio...");
@@ -109,11 +103,10 @@ async function main() {
 }
 
 main().catch((error) => {
-  logMessage("Server failed to start:", error);
+  logMessage("Error starting server:", error);
   process.exit(1);
 });
 
-// --- Graceful Shutdown ---
 const shutdown = async (signal: string) => {
   logMessage(`Received ${signal}. Shutting down server...`);
   try {
@@ -125,5 +118,6 @@ const shutdown = async (signal: string) => {
     process.exit(1);
   }
 };
+
 process.on("SIGINT", () => shutdown("SIGINT"));
 process.on("SIGTERM", () => shutdown("SIGTERM"));

@@ -12,11 +12,11 @@ export const sleep = (ms: number) =>
  * Collection of filesystem tool names for easy checking
  */
 export const filesystemToolNames = new Set([
-  "read_file_content",
-  "read_multiple_files_content",
-  "write_file_content",
+  "read_file_content", // Handles single/multiple files now
+  // "read_multiple_files_content", // Removed
+  "write_file_content", // Handles single/multiple files
   "edit_file_content",
-  "create_directory",
+  // "create_directory", // Removed
   "list_directory_contents",
   "get_directory_tree",
   "move_file_or_directory",

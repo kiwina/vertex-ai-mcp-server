@@ -25,17 +25,28 @@ This project implements a Model Context Protocol (MCP) server that provides a co
 *   `get_doc_snippets`: Provides precise, authoritative code snippets or concise answers for technical queries by searching official documentation.
 *   `generate_project_guidelines`: Generates a structured project guidelines document (Markdown) based on a specified list of technologies (optionally with versions), using web search for best practices.
 
+### Research & Analysis Tools
+*   `code_analysis_with_docs`: Analyzes code snippets by comparing them with best practices from official documentation, identifying potential bugs, performance issues, and security vulnerabilities.
+*   `technical_comparison`: Compares multiple technologies, frameworks, or libraries based on specific criteria, providing detailed comparison tables with pros/cons and use cases.
+*   `architecture_pattern_recommendation`: Suggests architecture patterns for specific use cases based on industry best practices, with implementation examples and considerations.
+*   `dependency_vulnerability_scan`: Analyzes project dependencies for known security vulnerabilities, providing detailed information and mitigation strategies.
+*   `database_schema_analyzer`: Reviews database schemas for normalization, indexing, and performance issues, suggesting improvements based on database-specific best practices.
+*   `security_best_practices_advisor`: Provides security recommendations for specific technologies or scenarios, with code examples for implementing secure practices.
+*   `testing_strategy_generator`: Creates comprehensive testing strategies for applications or features, suggesting appropriate testing types with coverage goals.
+*   `regulatory_compliance_advisor`: Provides guidance on regulatory requirements for specific industries (GDPR, HIPAA, etc.), with implementation approaches for compliance.
+*   `microservice_design_assistant`: Helps design microservice architectures for specific domains, with service boundary recommendations and communication patterns.
+*   `documentation_generator`: Creates comprehensive documentation for code, APIs, or systems, following industry best practices for technical documentation.
+
 ### Filesystem Operations
-*   `read_file_content`: Reads the complete contents of a single file.
-*   `read_multiple_files_content`: Reads the contents of multiple files simultaneously.
-*   `write_file_content`: Creates a new file or completely overwrites an existing file with new content.
+*   `read_file_content`: Read the complete contents of one or more files. Provide a single path string or an array of path strings.
+*   `write_file_content`: Create new files or completely overwrite existing files. The 'writes' argument accepts a single object (`{path, content}`) or an array of such objects.
 *   `edit_file_content`: Makes line-based edits to a text file, returning a diff preview or applying changes.
-*   `create_directory`: Creates a new directory (including nested directories).
 *   `list_directory_contents`: Lists files and directories directly within a specified path (non-recursive).
 *   `get_directory_tree`: Gets a recursive tree view of files and directories as JSON.
 *   `move_file_or_directory`: Moves or renames files and directories.
 *   `search_filesystem`: Recursively searches for files/directories matching a name pattern, with optional exclusions.
 *   `get_filesystem_info`: Retrieves detailed metadata (size, dates, type, permissions) about a file or directory.
+*   `execute_terminal_command`: Execute a shell command, optionally specifying `cwd` and `timeout`. Returns stdout/stderr.
 
 ### Combined AI + Filesystem Operations
 *   `save_generate_project_guidelines`: Generates project guidelines based on a tech stack and saves the result to a specified file path.
