@@ -17,7 +17,7 @@ const toolToTest: ToolDefinition = answerQueryWebsearchTool; // Removed <any>
 
 // 2. Provide sample arguments matching the tool's inputSchema
 const sampleQueryArgs = {
-  query: "What is the weather in Singapore today?",
+  query: "What is the weather in Singapore today? with real search results",
 };
 // --- End Configuration ---
 
@@ -58,7 +58,7 @@ const sampleQueryArgs = {
     const tools: Tool[] = [];
     if (useWebSearch) {
       console.log("Adding Google Search tool...");
-      tools.push({ googleSearchRetrieval: {} });
+      tools.push({ googleSearch: {} });
     }
 
     if (enableFunctionCalling) {

@@ -1,25 +1,55 @@
 import { HarmCategory, HarmBlockThreshold } from "@google/genai";
 
 // --- Determine Connection Method (Vertex AI or API Key) ---
-// We prioritize Vertex AI if project ID is set, otherwise fallback to API Key
+// Use AI_PROVIDER to determine which connection method to use
 export const GCLOUD_PROJECT = process.env.GOOGLE_CLOUD_PROJECT;
 export const GCLOUD_LOCATION =
   process.env.GOOGLE_CLOUD_LOCATION || "us-central1";
 export const GEMINI_API_KEY = process.env.GEMINI_API_KEY;
+export const AI_PROVIDER = process.env.AI_PROVIDER?.toLowerCase() || "vertex"; // Default to vertex if not specified
 
 // Determine the effective connection method
 export type ConnectionMethod = "vertex" | "apiKey";
 let connectionMethod: ConnectionMethod;
-if (GCLOUD_PROJECT) {
+
+if (AI_PROVIDER === "vertex") {
+  // Vertex AI mode requires GOOGLE_CLOUD_PROJECT
+  if (!GCLOUD_PROJECT) {
+    console.error(
+      "Error: AI_PROVIDER is set to 'vertex' but GOOGLE_CLOUD_PROJECT is not defined. Please set GOOGLE_CLOUD_PROJECT for Vertex AI."
+    );
+    process.exit(1);
+  }
   connectionMethod = "vertex";
-} else if (GEMINI_API_KEY) {
+} else if (AI_PROVIDER === "gemini") {
+  // Gemini API Key mode requires GEMINI_API_KEY
+  if (!GEMINI_API_KEY) {
+    console.error(
+      "Error: AI_PROVIDER is set to 'gemini' but GEMINI_API_KEY is not defined. Please set GEMINI_API_KEY for Gemini API access."
+    );
+    process.exit(1);
+  }
   connectionMethod = "apiKey";
 } else {
-  console.error(
-    "Error: No AI provider credentials found. Set either GOOGLE_CLOUD_PROJECT (for Vertex AI) or GEMINI_API_KEY."
+  // Invalid provider specified, try to fallback based on available credentials
+  console.warn(
+    `Warning: Invalid AI_PROVIDER value "${AI_PROVIDER}". Valid options are "vertex" or "gemini". Using fallback detection.`
   );
-  process.exit(1);
+
+  if (GCLOUD_PROJECT) {
+    console.warn("Using 'vertex' based on GOOGLE_CLOUD_PROJECT being set.");
+    connectionMethod = "vertex";
+  } else if (GEMINI_API_KEY) {
+    console.warn("Using 'gemini' based on GEMINI_API_KEY being set.");
+    connectionMethod = "apiKey";
+  } else {
+    console.error(
+      "Error: No AI provider credentials found. Set either GOOGLE_CLOUD_PROJECT (for Vertex AI) or GEMINI_API_KEY (for Gemini API)."
+    );
+    process.exit(1);
+  }
 }
+
 export const CONNECTION_METHOD = connectionMethod;
 
 // --- Common AI Configuration Defaults ---
@@ -120,12 +150,24 @@ export function getAIConfig() {
         `Invalid AI_RETRY_DELAY_MS value "${delayEnv}". Using default: ${DEFAULT_RETRY_DELAY_MS}`
       );
   }
+  // Determine model ID - allow provider-specific model override via env vars, otherwise use default
+  let modelId = DEFAULT_MODEL_ID;
 
-  // Determine model ID - allow override via env var, otherwise use default
-  const modelId = process.env.AI_MODEL_ID || DEFAULT_MODEL_ID;
+  if (CONNECTION_METHOD === "vertex") {
+    modelId =
+      process.env.VERTEX_MODEL_ID ||
+      process.env.AI_MODEL_ID ||
+      DEFAULT_MODEL_ID;
+  } else if (CONNECTION_METHOD === "apiKey") {
+    modelId =
+      process.env.GEMINI_MODEL_ID ||
+      process.env.AI_MODEL_ID ||
+      DEFAULT_MODEL_ID;
+  }
 
   return {
     connectionMethod: CONNECTION_METHOD,
+    provider: AI_PROVIDER,
     modelId,
     temperature,
     useStreaming,
